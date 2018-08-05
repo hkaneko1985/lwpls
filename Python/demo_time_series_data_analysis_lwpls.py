@@ -88,7 +88,13 @@ for test_sample_number in range(len(y_test_with_999)):
     autoscaled_x_test = (x_test_with_999[test_sample_number:test_sample_number+1,] - x_train.mean(axis=0)) / x_train.std(axis=0, ddof=1)
     autoscaled_estimated_y_test = lwpls(autoscaled_x_train, autoscaled_y_train, autoscaled_x_test, optimal_component_number,
                                         optimal_lambda_in_similarity)
-    estimated_y_test_with_999[test_sample_number] = autoscaled_estimated_y_test[:,optimal_component_number - 1] * y_train.std(ddof=1) + y_train.mean()
+    if np.isnan(autoscaled_estimated_y_test[:,optimal_component_number - 1]):
+        if test_sample_number == 0:
+            estimated_y_test_with_999[test_sample_number] = 0
+        else:
+            estimated_y_test_with_999[test_sample_number] = estimated_y_test_with_999[test_sample_number-1]
+    else:
+        estimated_y_test_with_999[test_sample_number] = autoscaled_estimated_y_test[:,optimal_component_number - 1] * y_train.std(ddof=1) + y_train.mean()
     
     if test_sample_number - y_measurement_delay >= 0:
         if y_test_with_999[test_sample_number-y_measurement_delay] != 999:
